@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Redes: IPv4 & Infraestrutura</title>
+    <style>
+        :root {
+            --cyan: #00f2ff;
+            --pink: #ff79c6;
+            --bg: #0a0a0c;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 0 0 20px var(--cyan);
+            margin-bottom: 40px;
+            text-align: center;
+            font-size: 2rem;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 20px 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-decoration: none;
+            color: white;
+            border: 2px solid;
+            border-radius: 8px;
+            transition: 0.3s;
+            background: transparent;
+            cursor: pointer;
+            text-align: center;
+            min-width: 260px;
+        }
+
+        /* Botão Introdução */
+        .btn-intro { 
+            border-color: var(--cyan); 
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.1); 
+        }
+        .btn-intro:hover {
+            background: var(--cyan);
+            color: black;
+            box-shadow: 0 0 30px var(--cyan);
+        }
+
+        /* Botão Aula Master */
+        .btn-master { 
+            border-color: var(--pink); 
+            box-shadow: 0 0 10px rgba(255, 121, 198, 0.1); 
+        }
+        .btn-master:hover {
+            background: var(--pink);
+            color: white;
+            box-shadow: 0 0 30px var(--pink);
+        }
+
+        .description {
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: #888;
+            display: block;
+            font-weight: normal;
+            text-transform: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>LABORATÓRIO DE REDES</h1>
+
+    <div class="container">
+        <a href="introducao.html" class="btn btn-intro">
+            1. Introdução
+            <span class="description">Fundamentos e Protocolos</span>
+        </a>
+
+        <a href="aula_master.html" class="btn btn-master">
+            2. Aula Master
+            <span class="description">Simulador 32 bits e Classes</span>
+        </a>
+    </div>
+
+</body>
+</html>
