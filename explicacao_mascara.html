@@ -2,117 +2,99 @@
 <html lang="pt-br">
 <head>
     <meta charset="utf-8">
-    <title>Protocolo de Redes: Máscaras e Sub-redes</title>
+    <title>Protocolo de Redes: Máscaras de 32 Bits</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/black.min.css">
     <style>
         :root { 
             --cyan: #00f2ff; --green: #39ff14; --pink: #ff79c6; 
-            --purple: #bd93f9; --yellow: #f1fa8c; --red: #ff3131;
+            --purple: #bd93f9; --yellow: #f1fa8c;
         }
         .reveal h1, .reveal h2 { color: var(--cyan); text-shadow: 0 0 20px var(--cyan); text-transform: uppercase; }
-        .reveal h3 { color: var(--pink); text-shadow: 0 0 10px var(--pink); }
         .highlight { color: var(--green); font-weight: bold; }
         .box { background: rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 15px; border: 1px solid var(--cyan); margin: 15px; text-align: left; }
         
-        /* Conversor de Máscara Interativo */
-        .bit-display { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
+        /* Painel de 32 Bits */
+        .full-mask-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
+        .octet-group { border: 1px solid #444; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.4); }
+        .bit-row { display: flex; gap: 3px; }
         .m-bit { 
-            width: 45px; height: 65px; border: 2px solid #444; border-radius: 8px; 
-            display: flex; align-items: center; justify-content: center; font-size: 1.2em; 
-            cursor: pointer; transition: 0.3s; font-weight: bold; background: #111; color: #444;
+            width: 30px; height: 45px; border: 1px solid #555; border-radius: 4px; 
+            display: flex; align-items: center; justify-content: center; font-size: 0.8em; 
+            cursor: pointer; transition: 0.2s; font-weight: bold; background: #222; color: #555;
         }
-        .m-bit.active { background: var(--purple); color: black; box-shadow: 0 0 15px var(--purple); border-color: white; }
-        .res-container { display: flex; justify-content: space-around; margin-top: 20px; font-family: monospace; }
-        .res-item { font-size: 1.5em; color: var(--yellow); }
-
-        table { font-size: 0.5em !important; width: 100%; border-collapse: separate; border-spacing: 0 5px; }
-        th { color: var(--yellow) !important; border-bottom: 2px solid var(--yellow); text-transform: uppercase; }
-        td { background: rgba(255,255,255,0.05); padding: 8px !important; }
+        .m-bit.active { background: var(--purple); color: black; box-shadow: 0 0 10px var(--purple); border-color: white; }
+        
+        .res-panel { 
+            margin-top: 30px; padding: 20px; border: 2px solid var(--green); border-radius: 10px;
+            display: flex; justify-content: space-around; font-family: 'Courier New', monospace; background: #111;
+        }
+        .res-val { font-size: 1.4em; color: var(--yellow); }
+        table { font-size: 0.45em !important; width: 100%; border-collapse: separate; border-spacing: 0 5px; }
+        th { color: var(--yellow) !important; border-bottom: 2px solid var(--yellow); }
+        td { background: rgba(255,255,255,0.05); padding: 5px !important; }
     </style>
 </head>
 <body>
     <div class="reveal">
         <div class="slides">
 
-            <section data-background-color="#050505">
-                <h1>Máscara de Rede</h1>
-                <p>O Filtro que define os limites da comunicação</p>
-                <div class="fragment box" style="text-align: center; border-color: var(--pink);">
-                    A máscara de rede é um número de 32 bits que separa o IP em: <br>
-                    <span style="color:var(--cyan)">Identificação da Rede</span> e <span style="color:var(--pink)">Identificação do Host</span>.
-                </div>
-            </section>
-
             <section>
-                <h3>Laboratório de Bits da Máscara</h3>
-                <p style="font-size: 0.5em;">Clique nos bits para ligar (1) ou desligar (0) e veja a máscara decimal</p>
-                
-                <div class="bit-display" id="mask-lab">
-                    <div class="m-bit" onclick="upM(this, 128)">0</div>
-                    <div class="m-bit" onclick="upM(this, 64)">0</div>
-                    <div class="m-bit" onclick="upM(this, 32)">0</div>
-                    <div class="m-bit" onclick="upM(this, 16)">0</div>
-                    <div class="m-bit" onclick="upM(this, 8)">0</div>
-                    <div class="m-bit" onclick="upM(this, 4)">0</div>
-                    <div class="m-bit" onclick="upM(this, 2)">0</div>
-                    <div class="m-bit" onclick="upM(this, 1)">0</div>
-                </div>
-
-                <div class="res-container">
-                    <div class="res-item">Decimal: <span id="m-dec">0</span></div>
-                    <div class="res-item">CIDR: /<span id="m-cidr">24</span>+<span id="m-count">0</span></div>
-                </div>
-                <p style="font-size: 0.4em; color: #888; margin-top: 15px;">*Simulação baseada no 4º octeto de uma rede comum.</p>
-            </section>
-
-            <section>
-                <h2>Notação CIDR</h2>
+                <h1>Máscaras de 32 Bits</h1>
+                <p>A Engenharia por trás do <span class="highlight">CIDR</span></p>
                 <div class="box">
-                    <p>O **CIDR** (*Classless Inter-Domain Routing*) indica a quantidade de bits "1" (ligados) após uma barra.</p>
-                    <ul>
-                        <li class="fragment"><span class="highlight">/8</span> = 255.0.0.0</li>
-                        <li class="fragment"><span class="highlight">/16</span> = 255.255.0.0</li>
-                        <li class="fragment"><span class="highlight">/24</span> = 255.255.255.0</li>
-                    </ul>
+                    Uma máscara de rede IPv4 possui sempre **32 bits**. 
+                    Ela define a fronteira exata onde termina o endereço da rede e começa o endereço do host.
+                </div>
+            </section>
+
+            <section>
+                <h3>Laboratório de Construção CIDR</h3>
+                <p style="font-size: 0.5em; margin-bottom: 10px;">Clique nos bits para "ligar" a máscara sequencialmente</p>
+                
+                <div class="full-mask-container" id="mask-board">
+                    </div>
+
+                <div class="res-panel">
+                    <div class="res-val">MÁSCARA: <span id="m-decimal">0.0.0.0</span></div>
+                    <div class="res-val">CIDR: /<span id="m-cidr">0</span></div>
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <button onclick="resetMask()" style="background: var(--pink); border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Resetar</button>
+                </div>
+            </section>
+
+            <section>
+                <h2>Cálculos e Sub-redes</h2>
+                <div class="box">
+                    <p>**Número de Sub-redes:** $2^n$ (onde $n$ é o número de bits emprestados).</p>
+                    <p style="margin-top:15px;">**Hosts por Sub-rede:** $2^h - 2$.</p>
+                    <p style="font-size: 0.6em; color: var(--pink);">Subtraímos 2 pois o primeiro IP identifica a rede e o último é o broadcast.</p>
                 </div>
                 
             </section>
 
             <section>
-                <h2>Cálculos de Sub-rede</h2>
-                <div class="box" style="border-left: 5px solid var(--green);">
-                    <p><span style="color:var(--yellow)">Número de Sub-redes:</span> $2^n$</p>
-                    <p style="font-size: 0.6em;">($n$ = bits emprestados da porção de host).</p>
-                    
-                    <p style="margin-top:20px;"><span style="color:var(--yellow)">Hosts por Sub-rede:</span> $2^h - 2$</p>
-                    <p style="font-size: 0.6em;">($h$ = bits de host restantes).</p>
-                    <p style="font-size: 0.5em; color: var(--pink);">Subtraímos 2 para excluir o endereço de Rede e de Broadcast.</p>
-                </div>
-            </section>
-
-            <section>
-                <h3>Tabela de Referência Técnica</h3>
+                <h3>Tabela de Referência CIDR</h3>
                 <table>
                     <thead>
-                        <tr><th>CIDR</th><th>Máscara</th><th>Hosts Utilizáveis</th><th>Uso</th></tr>
+                        <tr><th>CIDR</th><th>Máscara Decimal</th><th>Hosts Úteis</th><th>Exemplo de Uso</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>/24</td><td>255.255.255.0</td><td>254</td><td>LAN Comum</td></tr>
-                        <tr><td>/25</td><td>255.255.255.128</td><td>126</td><td>Divisão Classe C</td></tr>
-                        <tr><td>/27</td><td>255.255.255.224</td><td>30</td><td>Pequenos Grupos</td></tr>
+                        <tr><td>/8</td><td>255.0.0.0</td><td>16.777.214</td><td>Grandes Backbones</td></tr>
+                        <tr><td>/16</td><td>255.255.0.0</td><td>65.534</td><td>Empresas Médias</td></tr>
+                        <tr><td>/24</td><td>255.255.255.0</td><td>254</td><td>Redes Locais (LANs)</td></tr>
                         <tr><td>/30</td><td>255.255.255.252</td><td>2</td><td>Links Ponto-a-Ponto</td></tr>
                     </tbody>
                 </table>
             </section>
 
             <section data-background-gradient="radial-gradient(var(--purple), #000)">
-                <h1>Pronto para a Prática?</h1>
-                <p>Domine o fluxo dos dados entendendo a máscara.</p>
-                <div class="fragment">
-                    <a href="index.html" style="color: white; border: 1px solid var(--cyan); padding: 10px 20px; border-radius: 5px; text-decoration: none; font-size: 0.6em;">Voltar ao Menu</a>
-                </div>
+                <h1>Navegação Concluída</h1>
+                <p>O IPv4 está em suas mãos.</p>
+                <a href="index.html" style="color: white; border: 1px solid var(--cyan); padding: 10px 20px; border-radius: 5px; text-decoration: none; font-size: 0.6em;">Voltar ao Menu Principal</a>
             </section>
 
         </div>
@@ -122,23 +104,54 @@
     <script>
         Reveal.initialize({ hash: true, center: true, transition: 'zoom' });
 
-        let currentM = 0;
-        let bitCount = 0;
+        const board = document.getElementById('mask-board');
+        let maskOctets = [0, 0, 0, 0];
+        let totalCidr = 0;
 
-        function upM(el, val) {
+        // Gerar 32 bits
+        for (let o = 0; o < 4; o++) {
+            let group = document.createElement('div');
+            group.className = 'octet-group';
+            let row = document.createElement('div');
+            row.className = 'bit-row';
+
+            for (let b = 0; b < 8; b++) {
+                let bitVal = Math.pow(2, 7 - b);
+                let btn = document.createElement('div');
+                btn.className = 'm-bit';
+                btn.innerText = '0';
+                btn.onclick = function() { toggleMaskBit(this, o, bitVal); };
+                row.appendChild(btn);
+            }
+            group.appendChild(row);
+            board.appendChild(group);
+        }
+
+        function toggleMaskBit(el, oIdx, val) {
             if (el.classList.contains('active')) {
                 el.classList.remove('active');
                 el.innerText = '0';
-                currentM -= val;
-                bitCount--;
+                maskOctets[oIdx] -= val;
+                totalCidr--;
             } else {
                 el.classList.add('active');
                 el.innerText = '1';
-                currentM += val;
-                bitCount++;
+                maskOctets[oIdx] += val;
+                totalCidr++;
             }
-            document.getElementById('m-dec').innerText = currentM;
-            document.getElementById('m-count').innerText = bitCount;
+            document.getElementById('m-decimal').innerText = maskOctets.join('.');
+            document.getElementById('m-cidr').innerText = totalCidr;
+        }
+
+        function resetMask() {
+            document.querySelectorAll('.m-bit').forEach(b => {
+                b.classList.remove('active');
+                b.innerText = '0';
+            });
+            maskOctets = [0, 0, 0, 0];
+            totalCidr = 0;
+            document.getElementById('m-decimal').innerText = '0.0.0.0';
+            document.getElementById('m-cidr').innerText = '0';
         }
     </script>
 </body>
