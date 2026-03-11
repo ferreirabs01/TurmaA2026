@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <title>Mastering IPv4: Público vs Privado</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/black.min.css">
+    <style>
+        :root { --cyan: #00f2ff; --pink: #ff79c6; --green: #39ff14; --yellow: #f1fa8c; }
+        .reveal h1, .reveal h2 { color: var(--cyan); text-shadow: 0 0 15px var(--cyan); }
+        .box { background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; border: 1px solid var(--cyan); margin: 10px; text-align: left; font-size: 0.8em; }
+        .highlight-net { color: var(--cyan); font-weight: bold; }
+        .highlight-host { color: var(--pink); font-weight: bold; }
+        
+        /* Estilo do Simulador e Tabelas */
+        .octet-group { border: 1px solid #444; padding: 10px; border-radius: 8px; background: #111; }
+        .bit { width: 30px; height: 45px; border: 1px solid #555; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #222; font-size: 0.8em; }
+        .bit.active { background: var(--green); color: black; box-shadow: 0 0 10px var(--green); }
+        table { font-size: 0.5em !important; width: 100%; }
+        th { color: var(--yellow) !important; border-bottom: 1px solid var(--yellow); }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <section data-background-color="#050505">
+                <h1>Identidade na Rede</h1>
+                <p>IPv4: Público, Privado e Localhost</p>
+                <p style="font-size: 0.5em; opacity: 0.5;">Aulas de Arquitetura de Redes</p>
+            </section>
+
+            <section>
+                <h2>O RG da Máquina</h2>
+                <div class="box">
+                    <p>O IPv4 utiliza <strong>32 bits</strong> divididos em 4 octetos.</p>
+                    <p>Cada octeto varia de <strong>0 a 255</strong>.</p>
+                    <p class="fragment">Sem IP, seu dispositivo é um náufrago digital: ele existe, mas ninguém o encontra.</p>
+                </div>
+            </section>
+
+            <section>
+                <h3>🌐 Público vs 🏠 Privado</h3>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <div class="box fragment">
+                        <h4 style="color:var(--cyan)">IP PÚBLICO</h4>
+                        <ul>
+                            <li>Único no mundo todo.</li>
+                            <li>Endereço do seu "prédio" (Roteador).</li>
+                            <li>Visível na Internet.</li>
+                        </ul>
+                    </div>
+                    <div class="box fragment">
+                        <h4 style="color:var(--pink)">IP PRIVADO</h4>
+                        <ul>
+                            <li>Número do seu "quarto".</li>
+                            <li>Só vale dentro da sua rede.</li>
+                            <li>Protegido pelo NAT.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h3>Como identificar no "olhômetro"?</h3>
+                <table>
+                    <thead>
+                        <tr><th>Início do IP</th><th>Tipo</th><th>Exemplo</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="highlight-net">10.x.x.x</td><td>Privado (Classe A)</td><td>10.0.0.1</td></tr>
+                        <tr><td class="highlight-net">172.16.x a 172.31.x</td><td>Privado (Classe B)</td><td>172.16.0.10</td></tr>
+                        <tr><td class="highlight-net">192.168.x.x</td><td>Privado (Classe C)</td><td>192.168.1.1</td></tr>
+                        <tr><td style="color:var(--yellow)">127.x.x.x</td><td>Localhost</td><td>127.0.0.1 (Loopback)</td></tr>
+                        <tr><td style="color:white">Qualquer outro</td><td>Público</td><td>8.8.8.8 (Google)</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h3>Simulador de 32 Bits</h3>
+                <div style="display: flex; justify-content: center; gap: 10px;" id="sim-container">
+                    </div>
+                <div class="box" style="text-align: center; margin-top: 30px;">
+                    <div id="ip-res" style="font-size: 2em; font-family: monospace;">0.0.0.0</div>
+                    <div id="type-res" style="color: var(--yellow); font-size: 0.8em; margin-top: 10px;">Tipo: Público / Desconhecido</div>
+                </div>
+            </section>
+
+            <section>
+                <h2>A Máscara de Rede</h2>
+                <div class="box">
+                    <p>A máscara define a fronteira entre a <strong>Rede</strong> e o <strong>Host</strong>.</p>
+                    <p>Exemplo <strong>/24</strong> (255.255.255.0):</p>
+                    <p>24 bits para a <span class="highlight-net">Rede</span> e 8 bits para o <span class="highlight-host">Host</span>.</p>
+                </div>
+                <div class="fragment" style="color: var(--green); font-size: 0.8em;">
+                    Fórmula de Hosts: $2^h - 2$
+                </div>
+            </section>
+
+            <section>
+                <h3>Referência CIDR</h3>
+                <table>
+                    <thead>
+                        <tr><th>CIDR</th><th>Máscara Decimal</th><th>Hosts Úteis</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>/8</td><td>255.0.0.0</td><td>16.777.214</td></tr>
+                        <tr><td>/16</td><td>255.255.0.0</td><td>65.534</td></tr>
+                        <tr><td>/24</td><td>255.255.255.0</td><td>254</td></tr>
+                        <tr><td>/30</td><td>255.255.255.252</td><td>2</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section data-background-gradient="linear-gradient(#000, #1a1a2e)">
+                <h1>Pronto para Configurar?</h1>
+                <p>Entender o IP é entender como o mundo se fala.</p>
+                <div class="box" style="text-align:center">
+                    <code>ipconfig /all</code>
+                    <p style="font-size:0.5em">Teste este comando no seu computador agora!</p>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.js"></script>
+    <script>
+        Reveal.initialize({ hash: true, center: true, transition: 'convex' });
+
+        const container = document.getElementById('sim-container');
+        let octets = [0, 0, 0, 0];
+
+        for (let o = 0; o < 4; o++) {
+            let group = document.createElement('div');
+            group.className = 'octet-group';
+            let row = document.createElement('div');
+            row.style.display = "flex"; row.style.gap = "2px";
+
+            for (let b = 0; b < 8; b++) {
+                let val = Math.pow(2, 7 - b);
+                let bit = document.createElement('div');
+                bit.className = 'bit'; bit.innerText = '0';
+                bit.onclick = function() {
+                    if (this.classList.contains('active')) {
+                        this.classList.remove('active'); this.innerText = '0';
+                        octets[o] -= val;
+                    } else {
+                        this.classList.add('active'); this.innerText = '1';
+                        octets[o] += val;
+                    }
+                    update();
+                };
+                row.appendChild(bit);
+            }
+            group.appendChild(row);
+            container.appendChild(group);
+        }
+
+        function update() {
+            const ip = octets.join('.');
+            document.getElementById('ip-res').innerText = ip;
+            let type = "Público";
+            if (octets[0] === 10) type = "Privado (Classe A)";
+            else if (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31) type = "Privado (Classe B)";
+            else if (octets[0] === 192 && octets[1] === 168) type = "Privado (Classe C)";
+            else if (octets[0] === 127) type = "Localhost (Loopback)";
+            document.getElementById('type-res').innerText = "Tipo: " + type;
+        }
+    </script>
+</body>
+</html>
