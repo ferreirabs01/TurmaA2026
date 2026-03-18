@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modelo OSI - Interativo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .layer-btn {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .layer-btn:hover { background-color: #1e293b; border-left-color: #64748b; transform: translateX(5px); }
+        .layer-btn.active {
+            background-color: #1e293b;
+            border-left-color: #3b82f6;
+            font-weight: 600;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        /* Cores específicas para as camadas (topo para baixo) */
+        .color-7 { color: #f87171; } /* Aplicação */
+        .color-6 { color: #fb923c; } /* Apresentação */
+        .color-5 { color: #fbbf24; } /* Sessão */
+        .color-4 { color: #4ade80; } /* Transporte */
+        .color-3 { color: #38bdf8; } /* Rede */
+        .color-2 { color: #818cf8; } /* Enlace */
+        .color-1 { color: #c084fc; } /* Física */
+        
+        .fade-in { animation: fadeIn 0.4s ease-in-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-10 px-4">
+
+    <header class="max-w-5xl w-full mb-10 text-center">
+        <h1 class="text-4xl font-bold mb-4 text-white">O Modelo OSI</h1>
+        <p class="text-slate-400 max-w-2xl mx-auto">
+            Modelo de Referência para Interconexão de Sistemas Abertos. Dividido em 7 camadas lógicas, padroniza a comunicação entre diferentes sistemas de rede. Selecione uma camada abaixo para visualizar as especificações técnicas, protocolos e equipamentos associados.
+        </p>
+    </header>
+
+    <main class="max-w-5xl w-full flex flex-col md:flex-row gap-8">
+        
+        <div class="w-full md:w-1/3 flex flex-col gap-2 relative">
+            <div class="absolute -left-8 top-0 bottom-0 w-1 bg-slate-800 rounded-full hidden md:block"></div>
+            
+            <button class="layer-btn active p-4 rounded-r-lg bg-slate-800 flex justify-between items-center text-left" onclick="showLayer(7)">
+                <span class="text-lg"><span class="color-7 font-bold mr-2">7.</span> Aplicação</span>
+                <span class="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300">Software</span>
+            </button>
+            <button class="layer-btn p-4 rounded-r-lg bg-slate-800 flex justify-between items-center text-left" onclick="showLayer(6)">
+                <span class="text-lg"><span class="color-6 font-bold mr-2">6.</span> Apresentação</span>
+                <span class="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300">Software</span>
+            </button>
+            <button class="layer-btn p-4 rounded-r-lg bg-slate-800 flex justify-between items-center text-left" onclick="showLayer(5)">
+                <span class="text-lg"><span class="color-5 font-bold mr-2">5.</span> Sessão</span>
+                <span class="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300">Software</span>
+            </button>
+            <button class="layer-btn p-4 rounded-r-lg bg-slate-800 flex justify-between items-center text-left" onclick="showLayer(4)">
+                <span class="text-lg"><span class="color-4 font-bold mr-2">4.</span> Transporte</span>
+                <span class="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300">S.O.</span>
+            </button>
+            <button class="layer-btn p-4 rounded-r-lg bg-slate-800 flex justify-between items-center text-left" onclick="showLayer(3)">
+                <span class="text-lg"><span class="color-3 font-bold mr-2">3.</span> Rede</span>
+                <span class="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300">Hardware</span>
+            </button>
+            <button class="layer-btn p-4 rounded-r-lg bg-slate-800 flex justify-between items-center text-left" onclick="showLayer(2)">
+                <span class="text-lg"><span class="color-2 font-bold mr-2">2.</span> Enlace de Dados</span>
+                <span class="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300">Hardware</span>
+            </button>
+            <button class="layer-btn p-4 rounded-r-lg bg-slate-800 flex justify-between items-center text-left" onclick="showLayer(1)">
+                <span class="text-lg"><span class="color-1 font-bold mr-2">1.</span> Física</span>
+                <span class="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300">Hardware</span>
+            </button>
+        </div>
+
+        <div class="w-full md:w-2/3 bg-slate-800 rounded-xl p-8 border border-slate-700 shadow-2xl relative overflow-hidden" id="detail-panel">
+            <div id="layer-content" class="fade-in">
+                </div>
+        </div>
+
+    </main>
+
+    <script>
+        const osiData = {
+            7: {
+                name: "Camada de Aplicação",
+                colorClass: "color-7",
+                pdu: "Dados (Data)",
+                func: "Fornece interfaces de rede diretamente para os aplicativos do usuário. É a janela por onde processos e softwares acessam os serviços de rede.",
+                protocols: "HTTP, HTTPS, FTP, SMTP, DNS, SSH, Telnet.",
+                devices: "Computadores, Servidores, Firewalls de Aplicação (WAF).",
+                encapsulation: "Início da geração dos dados pelo aplicativo."
+            },
+            6: {
+                name: "Camada de Apresentação",
+                colorClass: "color-6",
+                pdu: "Dados (Data)",
+                func: "Atua como o tradutor da rede. Formata, criptografa e compacta os dados para garantir que a informação enviada pela camada de aplicação de um sistema seja legível para a camada de aplicação de outro.",
+                protocols: "SSL/TLS, ASCII, JPEG, MPEG, MIDI.",
+                devices: "Gateways, Software de Criptografia.",
+                encapsulation: "Formatação e criptografia dos dados puros."
+            },
+            5: {
+                name: "Camada de Sessão",
+                colorClass: "color-5",
+                pdu: "Dados (Data)",
+                func: "Estabelece, gerencia e encerra conexões (sessões) entre aplicativos em comunicação. Controla o diálogo entre computadores.",
+                protocols: "NetBIOS, RPC, PPTP, SOCKS.",
+                devices: "Gateways, PCs.",
+                encapsulation: "Adição de cabeçalhos de controle de sessão."
+            },
+            4: {
+                name: "Camada de Transporte",
+                colorClass: "color-4",
+                pdu: "Segmento (TCP) / Datagrama (UDP)",
+                func: "Responsável pela entrega fim-a-fim da mensagem completa. Realiza a segmentação dos dados, controle de fluxo e correção de erros (no caso do TCP).",
+                protocols: "TCP (Orientado a conexão), UDP (Sem conexão).",
+                devices: "Firewalls (Filtragem de Portas), Balanceadores de Carga.",
+                encapsulation: "Adição de portas de origem e destino (Cabeçalho TCP/UDP)."
+            },
+            3: {
+                name: "Camada de Rede",
+                colorClass: "color-3",
+                pdu: "Pacote (Packet)",
+                func: "Fornece endereçamento lógico (IP) e determina a melhor rota (roteamento) para os pacotes viajarem da origem ao destino através de múltiplas redes.",
+                protocols: "IPv4, IPv6, ICMP, IPSec, OSPF, BGP.",
+                devices: "Roteadores (Routers), Switches Layer 3.",
+                encapsulation: "Adição do endereço IP de origem e destino (Cabeçalho IP)."
+            },
+            2: {
+                name: "Camada de Enlace de Dados",
+                colorClass: "color-2",
+                pdu: "Quadro (Frame)",
+                func: "Prepara os pacotes da rede para transmissão física. Realiza o endereçamento físico (MAC Address), detecção de erros e controle de acesso ao meio (CSMA/CD).",
+                protocols: "Ethernet (IEEE 802.3), Wi-Fi (IEEE 802.11), PPP, ARP.",
+                devices: "Switches (Layer 2), Access Points (APs), Placas de Rede (NIC).",
+                encapsulation: "Adição do MAC Address e Trailer de checagem de erros (FCS)."
+            },
+            1: {
+                name: "Camada Física",
+                colorClass: "color-1",
+                pdu: "Bit",
+                func: "Transmissão pura e não estruturada de bits pelo meio físico. Define especificações elétricas, mecânicas e funcionais para ativar, manter e desativar o link físico.",
+                protocols: "USB, Bluetooth, Padrões de cabeamento (Cat5e, Cat6).",
+                devices: "Cabos (Cobre, Fibra Óptica), Hubs, Repetidores, Transceptores.",
+                encapsulation: "Conversão de quadros binários em sinais (elétricos, luminosos ou de rádio)."
+            }
+        };
+
+        function showLayer(layerNum) {
+            // Atualizar botões
+            document.querySelectorAll('.layer-btn').forEach((btn, index) => {
+                btn.classList.remove('active', 'border-blue-500');
+                if (7 - index === layerNum) {
+                    btn.classList.add('active');
+                }
+            });
+
+            const data = osiData[layerNum];
+            const contentDiv = document.getElementById('layer-content');
+            
+            // Remover e re-adicionar classe para reiniciar animação
+            contentDiv.classList.remove('fade-in');
+            void contentDiv.offsetWidth; // trigger reflow
+            contentDiv.classList.add('fade-in');
+
+            contentDiv.innerHTML = `
+                <div class="flex items-center justify-between mb-6 border-b border-slate-700 pb-4">
+                    <h2 class="text-3xl font-bold ${data.colorClass}">${layerNum}. ${data.name}</h2>
+                    <span class="bg-slate-700 text-slate-300 px-3 py-1 rounded-full text-sm font-mono border border-slate-600">PDU: ${data.pdu}</span>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-slate-400 text-sm uppercase tracking-wider mb-2">Função Principal</h3>
+                        <p class="text-slate-200 leading-relaxed text-lg">${data.func}</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-slate-900/50 p-4 rounded-lg border border-slate-700/50">
+                            <h3 class="text-slate-400 text-sm uppercase tracking-wider mb-2 flex items-center"><span class="mr-2">🔌</span> Protocolos</h3>
+                            <p class="text-slate-300 font-mono text-sm">${data.protocols}</p>
+                        </div>
+                        
+                        <div class="bg-slate-900/50 p-4 rounded-lg border border-slate-700/50">
+                            <h3 class="text-slate-400 text-sm uppercase tracking-wider mb-2 flex items-center"><span class="mr-2">🖧</span> Equipamentos</h3>
+                            <p class="text-slate-300 text-sm">${data.devices}</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-blue-900/20 border border-blue-900/50 rounded-lg">
+                        <h3 class="text-blue-400 text-sm uppercase tracking-wider mb-2">Processo de Encapsulamento</h3>
+                        <p class="text-slate-300 text-sm">${data.encapsulation}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Inicializar com a camada 7
+        window.onload = () => showLayer(7);
+    </script>
+</body>
+</html>
