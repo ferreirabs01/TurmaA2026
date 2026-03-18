@@ -1,1 +1,310 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animação: Encapsulamento OSI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; overflow-x: hidden; }
+        .layer-box { 
+            height: 50px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border: 1px solid #334155; 
+            border-radius: 6px; 
+            font-weight: 600;
+            background-color: #1e293b;
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* Cores das Camadas */
+        .l7 { border-left: 4px solid #f87171; }
+        .l6 { border-left: 4px solid #fb923c; }
+        .l5 { border-left: 4px solid #fbbf24; }
+        .l4 { border-left: 4px solid #4ade80; }
+        .l3 { border-left: 4px solid #38bdf8; }
+        .l2 { border-left: 4px solid #818cf8; }
+        .l1 { border-left: 4px solid #c084fc; }
+
+        /* O Pacote de Dados Animado */
+        #moving-packet {
+            position: absolute;
+            top: 0; left: 0;
+            display: flex;
+            align-items: center;
+            transition: all 1s ease-in-out;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .payload {
+            background-color: #e2e8f0;
+            color: #0f172a;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            white-space: nowrap;
+        }
+
+        .header {
+            color: #0f172a;
+            padding: 4px 6px;
+            font-size: 11px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        /* Cores dos Cabeçalhos para combinar com a camada */
+        .hdr-l4 { background-color: #4ade80; border-radius: 4px 0 0 4px; } /* TCP */
+        .hdr-l3 { background-color: #38bdf8; border-radius: 4px 0 0 4px; } /* IP */
+        .hdr-l2 { background-color: #818cf8; border-radius: 4px 0 0 4px; } /* MAC */
+        .trl-l2 { background-color: #818cf8; border-radius: 0 4px 4px 0; } /* FCS */
+        
+        /* Representação binária */
+        .bits {
+            font-family: 'Fira Code', monospace;
+            color: #c084fc;
+            font-size: 14px;
+            letter-spacing: 2px;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 1px solid #c084fc;
+        }
+
+        /* Linha de conexão (Meio físico) */
+        .network-cable {
+            position: absolute;
+            bottom: 25px;
+            left: 200px;
+            right: 200px;
+            height: 4px;
+            background: linear-gradient(90deg, #c084fc, #38bdf8, #c084fc);
+            z-index: 0;
+            border-radius: 2px;
+            box-shadow: 0 0 10px #38bdf8;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col p-4 md:p-8">
+
+    <header class="max-w-6xl mx-auto w-full mb-8">
+        <h1 class="text-3xl font-bold mb-2">Simulador de Tráfego: Encapsulamento OSI</h1>
+        <p class="text-slate-400">Observe como a informação é preparada (encapsulada) pelo emissor, transmitida em bits e remontada (desencapsulada) pelo receptor.</p>
+    </header>
+
+    <main class="max-w-6xl mx-auto w-full bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-2xl flex flex-col items-center">
+        
+        <div class="w-full flex flex-col md:flex-row gap-4 justify-between items-center mb-10 bg-slate-900 p-4 rounded-lg border border-slate-700">
+            <div class="flex gap-4">
+                <button id="btn-start" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded font-semibold transition">Iniciar Simulação</button>
+                <button id="btn-reset" class="bg-slate-700 hover:bg-slate-600 text-white px-6 py-2 rounded font-semibold transition">Reiniciar</button>
+            </div>
+            <div class="flex-1 w-full md:ml-8 border-l-4 border-blue-500 bg-slate-800 p-3 rounded">
+                <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Status da Operação</p>
+                <p id="status-text" class="text-sm md:text-base font-mono text-blue-300">Aguardando início...</p>
+            </div>
+        </div>
+
+        <div class="relative w-full max-w-4xl flex justify-between px-4 pb-12" id="animation-area">
+            
+            <div class="w-40 flex flex-col gap-2 relative z-10">
+                <div class="text-center mb-2 font-bold text-slate-300">EMISSOR</div>
+                <div class="layer-box l7" id="tx-7">7. Aplicação</div>
+                <div class="layer-box l6" id="tx-6">6. Apresentação</div>
+                <div class="layer-box l5" id="tx-5">5. Sessão</div>
+                <div class="layer-box l4" id="tx-4">4. Transporte</div>
+                <div class="layer-box l3" id="tx-3">3. Rede</div>
+                <div class="layer-box l2" id="tx-2">2. Enlace</div>
+                <div class="layer-box l1" id="tx-1">1. Física</div>
+            </div>
+
+            <div class="network-cable hidden md:block" id="cable"></div>
+
+            <div class="w-40 flex flex-col gap-2 relative z-10">
+                <div class="text-center mb-2 font-bold text-slate-300">RECEPTOR</div>
+                <div class="layer-box l7" id="rx-7">7. Aplicação</div>
+                <div class="layer-box l6" id="rx-6">6. Apresentação</div>
+                <div class="layer-box l5" id="rx-5">5. Sessão</div>
+                <div class="layer-box l4" id="rx-4">4. Transporte</div>
+                <div class="layer-box l3" id="rx-3">3. Rede</div>
+                <div class="layer-box l2" id="rx-2">2. Enlace</div>
+                <div class="layer-box l1" id="rx-1">1. Física</div>
+            </div>
+
+            <div id="moving-packet">
+                <div id="hdr-mac" class="header hdr-l2 hidden">MAC</div>
+                <div id="hdr-ip" class="header hdr-l3 hidden">IP</div>
+                <div id="hdr-tcp" class="header hdr-l4 hidden">TCP</div>
+                <div id="payload" class="payload">DADOS</div>
+                <div id="trl-fcs" class="header trl-l2 hidden">FCS</div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        const packet = document.getElementById('moving-packet');
+        const statusText = document.getElementById('status-text');
+        const btnStart = document.getElementById('btn-start');
+        const btnReset = document.getElementById('btn-reset');
+        
+        // Headers e Payload
+        const hMac = document.getElementById('hdr-mac');
+        const hIp = document.getElementById('hdr-ip');
+        const hTcp = document.getElementById('hdr-tcp');
+        const payload = document.getElementById('payload');
+        const tFcs = document.getElementById('trl-fcs');
+
+        let currentStep = 0;
+        let animationInterval;
+        let isAnimating = false;
+
+        // Definição dos passos da animação
+        const steps = [
+            // --- ENCAPSULAMENTO (Emissor descendo) ---
+            { target: 'tx-7', text: "Camada 7 (Aplicação): Usuário gera a informação (Dados puros).", action: 'init' },
+            { target: 'tx-6', text: "Camada 6 (Apresentação): Dados formatados e criptografados.", action: 'move' },
+            { target: 'tx-5', text: "Camada 5 (Sessão): Sessão de comunicação iniciada.", action: 'move' },
+            { target: 'tx-4', text: "Camada 4 (Transporte): Encapsulamento! Adicionado Cabeçalho TCP (Porta Origem/Destino). O dado vira um SEGMENTO.", action: 'add-l4' },
+            { target: 'tx-3', text: "Camada 3 (Rede): Encapsulamento! Adicionado Cabeçalho IP (IP Origem/Destino). O segmento vira um PACOTE.", action: 'add-l3' },
+            { target: 'tx-2', text: "Camada 2 (Enlace): Encapsulamento! Adicionado Cabeçalho MAC e Trailer FCS (verificação de erro). Vira um QUADRO (Frame).", action: 'add-l2' },
+            { target: 'tx-1', text: "Camada 1 (Física): Quadro convertido em BITS para transmissão no meio físico.", action: 'to-bits' },
+            
+            // --- TRANSMISSÃO (Meio físico) ---
+            { target: 'rx-1', text: "Transmissão... Sinais elétricos/luminosos/ondas viajam até o destino.", action: 'move-bits' },
+            
+            // --- DESENCAPSULAMENTO (Receptor subindo) ---
+            { target: 'rx-2', text: "Camada 2 (Receptor): Bits remontados em Quadro. Endereço MAC verificado. Trailer FCS conferido e descartado.", action: 'rem-l2' },
+            { target: 'rx-3', text: "Camada 3 (Receptor): Desencapsulamento! Endereço IP verificado. Cabeçalho IP descartado.", action: 'rem-l3' },
+            { target: 'rx-4', text: "Camada 4 (Receptor): Desencapsulamento! Portas TCP verificadas para direcionar ao app correto. Cabeçalho TCP descartado.", action: 'rem-l4' },
+            { target: 'rx-5', text: "Camada 5 (Sessão): Sessão mantida.", action: 'move' },
+            { target: 'rx-6', text: "Camada 6 (Apresentação): Dados descriptografados e traduzidos.", action: 'move' },
+            { target: 'rx-7', text: "Camada 7 (Aplicação): Dados puros entregues ao aplicativo de destino. Processo Concluído!", action: 'finish' }
+        ];
+
+        function getCenterCoords(elementId) {
+            const el = document.getElementById(elementId);
+            const rect = el.getBoundingClientRect();
+            const parentRect = document.getElementById('animation-area').getBoundingClientRect();
+            
+            return {
+                x: rect.left - parentRect.left + (rect.width / 2),
+                y: rect.top - parentRect.top + (rect.height / 2)
+            };
+        }
+
+        function executeStep() {
+            if (currentStep >= steps.length) {
+                clearInterval(animationInterval);
+                isAnimating = false;
+                btnStart.disabled = false;
+                btnStart.classList.remove('opacity-50', 'cursor-not-allowed');
+                return;
+            }
+
+            const step = steps[currentStep];
+            statusText.innerHTML = step.text;
+
+            const coords = getCenterCoords(step.target);
+            
+            // Ajustar a posição para centralizar o pacote
+            const packetWidth = packet.offsetWidth;
+            const packetHeight = packet.offsetHeight;
+            packet.style.left = `${coords.x - (packetWidth / 2) + 120}px`; // Offset para ficar ao lado da caixa
+            packet.style.top = `${coords.y - (packetHeight / 2)}px`;
+
+            // Ações de visualização
+            switch(step.action) {
+                case 'init':
+                    packet.style.opacity = '1';
+                    packet.className = 'absolute flex items-center transition-all duration-1000';
+                    payload.innerHTML = 'DADOS';
+                    payload.className = 'payload';
+                    hMac.classList.add('hidden');
+                    hIp.classList.add('hidden');
+                    hTcp.classList.add('hidden');
+                    tFcs.classList.add('hidden');
+                    break;
+                case 'add-l4': hTcp.classList.remove('hidden'); break;
+                case 'add-l3': hIp.classList.remove('hidden'); break;
+                case 'add-l2': 
+                    hMac.classList.remove('hidden'); 
+                    tFcs.classList.remove('hidden'); 
+                    break;
+                case 'to-bits':
+                    hMac.classList.add('hidden');
+                    hIp.classList.add('hidden');
+                    hTcp.classList.add('hidden');
+                    tFcs.classList.add('hidden');
+                    payload.className = 'bits';
+                    payload.innerHTML = '101101001';
+                    break;
+                case 'move-bits':
+                    packet.style.left = `${coords.x - (packetWidth / 2) - 120}px`; // Ajuste para o lado esquerdo do receptor
+                    break;
+                case 'rem-l2':
+                    payload.className = 'payload';
+                    payload.innerHTML = 'DADOS';
+                    hMac.classList.remove('hidden');
+                    hIp.classList.remove('hidden');
+                    hTcp.classList.remove('hidden');
+                    tFcs.classList.remove('hidden');
+                    packet.style.left = `${coords.x - (packetWidth / 2) - 120}px`;
+                    setTimeout(() => { hMac.classList.add('hidden'); tFcs.classList.add('hidden'); }, 500);
+                    break;
+                case 'rem-l3': hIp.classList.add('hidden'); break;
+                case 'rem-l4': hTcp.classList.add('hidden'); break;
+                case 'move':
+                case 'finish':
+                    packet.style.left = `${coords.x - (packetWidth / 2) - 120}px`;
+                    break;
+            }
+
+            currentStep++;
+        }
+
+        function startAnimation() {
+            if (isAnimating) return;
+            isAnimating = true;
+            btnStart.disabled = true;
+            btnStart.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            if (currentStep === steps.length) resetAnimation(false);
+
+            // Calcula o primeiro passo imediatamente, os próximos a cada 2 segundos
+            executeStep();
+            animationInterval = setInterval(executeStep, 2000);
+        }
+
+        function resetAnimation(fullReset = true) {
+            clearInterval(animationInterval);
+            currentStep = 0;
+            isAnimating = false;
+            packet.style.opacity = '0';
+            statusText.innerHTML = "Aguardando início...";
+            if(fullReset) {
+                btnStart.disabled = false;
+                btnStart.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        btnStart.addEventListener('click', startAnimation);
+        btnReset.addEventListener('click', resetAnimation);
+        window.addEventListener('resize', () => { if(!isAnimating) resetAnimation(); });
+
+    </script>
+</body>
+</html>
